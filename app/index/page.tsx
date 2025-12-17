@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Index from './client';
+import Index from '../client';
 
 export const metadata: Metadata = {
   title: 'Rajasthani News - Latest News, Breaking News, India News',
