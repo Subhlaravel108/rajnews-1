@@ -20,7 +20,281 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  /* background: var(--background); */
+  /* color: var(--foreground);
+   */
+   color:#171717;
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* News Container */
+.news-container {
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .news-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .news-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Section Title */
+.section-title {
+  font-family: var(--font-geist-sans), serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid hsl(var(--primary));
+}
+
+@media (min-width: 768px) {
+  .section-title {
+    font-size: 1.875rem;
+  }
+}
+
+/* Category Badge */
+.category-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-radius: 0.25rem;
+}
+
+.category-badge-primary {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-radius: 0.25rem;
+}
+
+/* Navigation Link - moved to @layer components below */
+
+/* News Card */
+.news-card {
+  background-color: hsl(var(--card));
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  transition: box-shadow 0.2s;
+}
+
+.news-card:hover {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.news-card-image {
+  transition: transform 0.3s;
+}
+
+.group:hover .news-card-image {
+  transform: scale(1.1);
+}
+
+/* News Title */
+.news-title {
+  font-family: var(--font-geist-sans), serif;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  transition: color 0.2s;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.group:hover .news-title {
+  color: hsl(var(--primary));
+}
+
+/* News Excerpt */
+.news-excerpt {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* News Meta */
+.news-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+
+/*-------------------------------------------------------------- header */
+/* Add to your global.css or tailwind.css */
+@layer components {
+  .nav-link {
+    @apply px-4 py-3 text-sm font-medium hover:bg-blue-700 hover:text-white transition-all duration-200 border-r border-blue-800/30 last:border-r-0 flex items-center gap-1;
+  }
+  
+  .mobile-nav-link {
+    @apply block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-colors border-b border-gray-100 last:border-b-0;
+  }
+  
+  .container {
+    @apply max-w-7xl mx-auto px-4;
+  }
+}
+
+/* Animation classes */
+@keyframes slide-in-from-top {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-in {
+  animation: slide-in-from-top 0.2s ease-out;
+}
+
+
+/* -----------------------------------------------------------------articleCard */
+/* Add to your global.css */
+@layer utilities {
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    line-clamp: 1;
+  }
+  
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    line-clamp: 2;
+  }
+  
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+   line-clamp: 3;
+  }
+  
+  .aspect-16\/10 {
+    aspect-ratio: 16/10;
+  }
+  
+  .aspect-4\/3 {
+    aspect-ratio: 4/3;
+  }
+  
+  .aspect-video {
+    aspect-ratio: 16/9;
+  }
+}
+
+/* Custom scrollbar for lists */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #4a5568 #1a202c;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: #1a202c;
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #4a5568;
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #718096;
+}
+
+
+/* ------------------------------------------------------CategorySidebar.tsx */
+/* Add to your global.css */
+@layer utilities {
+  .bg-gradient-radial {
+    background-image: radial-gradient(var(--tw-gradient-stops));
+  }
+  
+  .backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+  }
+  
+  .backdrop-blur-md {
+    backdrop-filter: blur(8px);
+  }
+  
+  .animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* globals.css */
+@layer base {
+  :root {
+    /* Primary Colors */
+    --color-royal-indigo: #172C64;
+    --color-saffron: #F05C03;
+    --color-sand-bg: #F8F4E9;
+    
+    /* Secondary Colors */
+    --color-maroon: #9A1C20;
+    --color-gold: #F0C24C;
+    
+    /* Text Colors */
+    --color-text-primary: #1A1A1A;
+    --color-text-secondary: #4A5568;
+    --color-text-light: #FFFFFF;
+  }
+  
+  body {
+    @apply bg-[#F8F4E9] text-[#1A1A1A];
+  }
 }
