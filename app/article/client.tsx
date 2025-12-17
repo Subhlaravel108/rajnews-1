@@ -50,12 +50,12 @@ const ArticlePage = () => {
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
             <Link
               href={`/category/${article.category.toLowerCase()}`}
-              className="text-muted-foreground hover:text-primary"
+              className="text-black hover:text-primary"
             >
               {article.category}
             </Link>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            <span className="text-foreground font-medium line-clamp-1">
+            <span className="text-orange-600 font-medium line-clamp-1">
               {article.title}
             </span>
           </nav>
@@ -71,7 +71,7 @@ const ArticlePage = () => {
               <span className="category-badge mb-4">{article.category}</span>
 
               {/* Title */}
-              <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl font-bold text-foreground leading-tight mb-6">
+              <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl font-bold text-black leading-tight mb-6">
                 {article.title}
               </h1>
 
@@ -124,7 +124,7 @@ const ArticlePage = () => {
                 {article.content.split('\n\n').map((paragraph, index) => {
                   if (paragraph.startsWith('## ')) {
                     return (
-                      <h2 key={index} className="font-serif text-xl font-bold text-foreground mt-8 mb-4">
+                      <h2 key={index} className="font-serif text-xl font-bold text-black mt-8 mb-4">
                         {paragraph.replace('## ', '')}
                       </h2>
                     );
@@ -132,7 +132,7 @@ const ArticlePage = () => {
                   if (paragraph.startsWith('- ')) {
                     const items = paragraph.split('\n').filter(line => line.startsWith('- '));
                     return (
-                      <ul key={index} className="list-disc list-inside space-y-2 mb-4 text-foreground">
+                      <ul key={index} className="list-disc list-inside space-y-2 mb-4 text-black">
                         {items.map((item, i) => (
                           <li key={i}>{item.replace('- ', '')}</li>
                         ))}
@@ -140,7 +140,7 @@ const ArticlePage = () => {
                     );
                   }
                   return (
-                    <p key={index} className="text-foreground leading-relaxed mb-4">
+                    <p key={index} className="text-black leading-relaxed mb-4">
                       {paragraph}
                     </p>
                   );
@@ -173,7 +173,7 @@ const ArticlePage = () => {
                     <ChevronLeft className="w-5 h-5 text-muted-foreground shrink-0" />
                     <div>
                       <span className="text-xs text-muted-foreground">Previous Post</span>
-                      <p className="text-sm font-medium text-foreground line-clamp-2">{prevArticle.title}</p>
+                      <p className="text-sm font-medium text-black line-clamp-2">{prevArticle.title}</p>
                     </div>
                   </Link>
                 )}
@@ -185,7 +185,7 @@ const ArticlePage = () => {
                     <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
                     <div>
                       <span className="text-xs text-muted-foreground">Next Post</span>
-                      <p className="text-sm font-medium text-foreground line-clamp-2">{nextArticle.title}</p>
+                      <p className="text-sm font-medium text-black line-clamp-2">{nextArticle.title}</p>
                     </div>
                   </Link>
                 )}

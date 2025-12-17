@@ -121,7 +121,7 @@ const CategoryPage = () => {
                 Home
               </Link>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
-              <span className="text-foreground font-medium">
+              <span className="text-foreground text-orange-600 font-medium">
                 {category?.name || 'All News'}
               </span>
             </nav>
@@ -148,7 +148,7 @@ const CategoryPage = () => {
               Home
             </Link>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            <span className="text-foreground font-medium">
+            <span className="text-orange-600 font-medium">
               {category?.name || 'All News'}
             </span>
           </nav>
@@ -199,7 +199,7 @@ const CategoryPage = () => {
                   <div className="flex-1">
                     <span className="category-badge mb-3">{article.category}</span>
                     <Link href={`/article/${article.id}`}>
-                      <h2 className="font-serif text-xl font-bold text-foreground hover:text-primary transition-colors mb-3">
+                      <h2 className="font-serif text-xl font-bold  text-foreground hover:text-primary transition-colors mb-3">
                         {article.title}
                       </h2>
                     </Link>
