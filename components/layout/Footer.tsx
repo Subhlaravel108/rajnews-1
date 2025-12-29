@@ -1,25 +1,50 @@
 "use client"
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Facebook, Twitter, Instagram, Youtube, Mail, MapPin, Phone, Send } from 'lucide-react';
-import { categories } from '@/data/newsData';
+import Image from 'next/image';
+import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, Send } from 'lucide-react';
+import { getCategories } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { CONTACT_INFO } from '@/lib/constants';
 
 const cities = [
   'Jaipur', 'Udaipur', 'Jodhpur', 'Ajmer', 'Bikaner', 'Jaisalmer',
-  'Kota', 'Alwar', 'Bharatpur', 'Sikar', 'Pali', 'Barmer'
+  'Pushkar', 'Mount Abu', 'Alwar', 'Banswara', 'Baran', 'Barmer',
+  'Bharatpur', 'Bhilwara', 'Jalore', 'Jhalawar', 'Jhunjhunu', 'Karauli',
+  'Kota', 'Nagaur', 'Pali', 'Pratapgarh', 'Rajsamand', 'Sawai Madhopur',
+  'Sikar', 'Sirohi', 'Sri Ganganagar', 'Tonk', 'Dausa', 'Dholpur',
+  'Hanumangarh', 'Bundi', 'Chittorgarh', 'Churu', 'Sanchore', 'Shahpura (Bhilwara)',
+  'Neem ka Thana (Sikar)', 'Gangapur City (Karauli)', 'Beawar (Ajmer)', 'Deeg (Bharatpur)', 
+  'Kotputli (Jaipur/Alwar)', 'Phalodi (Jodhpur)', 'Didwana (Nagaur)', 'Kekri (Ajmer)', 
+  'Tijara (Alwar)', 'Balotra', 'Dungarpur'
 ];
 
+const getCitySlug = (city: string) => {
+  return city
+    .toLowerCase()
+    .replace(/\([^)]*\)/g, '') // Remove content in parentheses
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/[^a-z0-9-]/g, '') // Remove special characters
+    .replace(/-+/g, '-') // Replace multiple hyphens with single
+    .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+};
+
 const Footer = () => {
-  const [lastUpdated, setLastUpdated] = useState<string>('');
+  const [categories, setCategories] = useState<any[]>([]);
   
   useEffect(() => {
-    setLastUpdated(new Date().toLocaleDateString('en-IN', { 
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    }));
+    const fetchCategories = async () => {
+      try {
+        const data = await getCategories(false); // false = exclude subcategories
+        setCategories(data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        setCategories([]);
+      }
+    };
+
+    fetchCategories();
   }, []);
 
   const handleSubscribe = (e: React.FormEvent) => {
@@ -72,38 +97,24 @@ const Footer = () => {
             {/* Logo & About */}
             <div>
               <Link href="/" className="inline-block mb-4">
-                <div className="flex items-end gap-2">
-                  <div className="flex flex-col">
-                    <span className="text-xl font-bold text-white">
-                      Rajasthan
-                    </span>
-                    <span className="text-lg font-bold text-[#F0C24C]">
-                      News
-                    </span>
-                  </div>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-[#F05C03] text-white rounded">
-                    LIVE
-                  </span>
-                </div>
-              </Link>
-              
-              <p className="text-white/70 text-sm mb-4">
-                Rajasthan's trusted news source since 1995
-              </p>
-              
+                <Image
+                  src="/raj_news_logo.png"
+                  alt="Rajasthan News Logo"
+                  width={160}
+                  height={50}
+                  className="h-10 md:h-12 w-auto object-contain"
+                />
+               </Link>
+                           
               {/* Contact Info */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-white/70 text-sm">
-                  <MapPin className="w-4 h-4 text-[#F0C24C]" />
-                  <span>Jaipur, Rajasthan</span>
-                </div>
-                <div className="flex items-center gap-2 text-white/70 text-sm">
                   <Phone className="w-4 h-4 text-[#F0C24C]" />
-                  <span>+91 141 123 4567</span>
-                </div>
-                <div className="flex items-center gap-2 text-white/70 text-sm">
+                  <span>{CONTACT_INFO.phone}</span>
+                </div> 
+                 <div className="flex items-center gap-2 text-white/70 text-sm">
                   <Mail className="w-4 h-4 text-[#F0C24C]" />
-                  <span>contact@rajasthannews.com</span>
+                  <span>{CONTACT_INFO.email}</span>
                 </div>
               </div>
             </div>
@@ -124,11 +135,7 @@ const Footer = () => {
                     </Link>
                   </li>
                 ))}
-                <li>
-                  <Link href="/about" className="text-white/70 hover:text-[#F0C24C] transition-colors text-sm">
-                    About Us
-                  </Link>
-                </li>
+            
                 <li>
                   <Link href="/contact" className="text-white/70 hover:text-[#F0C24C] transition-colors text-sm">
                     Contact
@@ -145,10 +152,8 @@ const Footer = () => {
               <ul className="space-y-2">
                 <li><Link href="/category/politics" className="text-white/70 hover:text-[#F0C24C] transition-colors text-sm">Politics</Link></li>
                 <li><Link href="/category/business" className="text-white/70 hover:text-[#F0C24C] transition-colors text-sm">Business</Link></li>
-                <li><Link href="/category/tourism" className="text-white/70 hover:text-[#F0C24C] transition-colors text-sm">Tourism</Link></li>
+                <li><Link href="/category/lifestyle" className="text-white/70 hover:text-[#F0C24C] transition-colors text-sm">Life Style</Link></li>
                 <li><Link href="/category/sports" className="text-white/70 hover:text-[#F0C24C] transition-colors text-sm">Sports</Link></li>
-                <li><Link href="/live-tv" className="text-white/70 hover:text-[#F0C24C] transition-colors text-sm">Live TV</Link></li>
-                <li><Link href="/e-paper" className="text-white/70 hover:text-[#F0C24C] transition-colors text-sm">E-Paper</Link></li>
               </ul>
             </div>
 
@@ -177,7 +182,7 @@ const Footer = () => {
               </div>
 
               {/* Cities */}
-              <div>
+              {/* <div>
                 <h5 className="font-medium text-white mb-2 text-sm">
                   Cities
                 </h5>
@@ -185,14 +190,14 @@ const Footer = () => {
                   {cities.map((city, index) => (
                     <Link
                       key={index}
-                      href={`/city/${city.toLowerCase()}`}
+                      href={`/city/${getCitySlug(city)}`}
                       className="px-2 py-1 bg-white/5 hover:bg-white/10 text-white/80 hover:text-white text-xs rounded transition-colors"
                     >
                       {city}
                     </Link>
                   ))}
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
 
@@ -202,13 +207,13 @@ const Footer = () => {
           {/* Cities Grid - Minimal */}
           <div className="mb-6">
             <h4 className="font-semibold text-white mb-3 text-center">
-              Rajasthan Districts Coverage
+              Cities
             </h4>
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
               {cities.map((city, index) => (
                 <Link
                   key={index}
-                  href={`/city/${city.toLowerCase()}`}
+                  href={`/city/${getCitySlug(city)}`}
                   className="px-3 py-2 bg-white/5 hover:bg-white/10 text-white/80 hover:text-white text-sm rounded-lg text-center transition-colors"
                 >
                   {city}
@@ -243,19 +248,19 @@ const Footer = () => {
               <Link href="/disclaimer" className="text-white/60 hover:text-[#F0C24C] transition-colors">
                 Disclaimer
               </Link>
-              <span className="text-white/30 hidden sm:inline">•</span>
+              {/* <span className="text-white/30 hidden sm:inline">•</span>
               <Link href="/sitemap" className="text-white/60 hover:text-[#F0C24C] transition-colors hidden sm:inline">
                 Sitemap
-              </Link>
+              </Link> */}
             </div>
             
             {/* Update Status */}
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
               <span className="text-white/50 text-xs">
                 Updated: {lastUpdated || 'Today'}
               </span>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

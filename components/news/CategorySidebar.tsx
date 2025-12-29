@@ -1,28 +1,49 @@
+"use client"
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, TrendingUp, Hash, Flame, Zap, Newspaper } from 'lucide-react';
-import { categories } from '@/data/newsData';
+import { getCategories } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
 
 const CategorySidebar = () => {
+  const [categories, setCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoading(true);
+        const data = await getCategories(false); // false = exclude subcategories
+        setCategories(data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        setCategories([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
   // Updated Rajasthan/Indian themed category images
-  const categoryImages: Record<string, string> = {
-    politics: 'https://images.unsplash.com/photo-1581985560556-83cddac94b23?w=300&h=200&fit=crop&q=80', // Indian parliament
-    business: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=300&h=200&fit=crop&q=80', // Jaipur markets
-    technology: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=300&h=200&fit=crop&q=80', // Indian tech
-    health: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=300&h=200&fit=crop&q=80', // Indian hospital
-    sports: 'https://images.unsplash.com/photo-1612872087727-0e4a2f34b6c7?w=300&h=200&fit=crop&q=80', // Cricket in Rajasthan
-    entertainment: 'https://images.unsplash.com/photo-1548032885-b5e38734688a?w=300&h=200&fit=crop&q=80', // Bollywood/Rajasthani culture
-    world: 'https://images.unsplash.com/photo-1587017539507-7c6c0e58a5b0?w=300&h=200&fit=crop&q=80', // Global with Indian context
-    lifestyle: 'https://images.unsplash.com/photo-1556909114-ff6a48d6c48c?w=300&h=200&fit=crop&q=80', // Rajasthani lifestyle
-    education: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=300&h=200&fit=crop&q=80',
-    environment: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=300&h=200&fit=crop&q=80',
-    crime: 'https://images.unsplash.com/photo-1563986768604-420e8d58a9dc?w=300&h=200&fit=crop&q=80',
-    travel: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=300&h=200&fit=crop&q=80',
-    general: 'https://images.unsplash.com/photo-1591276323627-4c71d2e0e8a8?w=300&h=200&fit=crop&q=80', // Rajasthani landscape
-    'rajasthan-news': 'https://images.unsplash.com/photo-1548013146-72479768bada?w=300&h=200&fit=crop&q=80', // Hawa Mahal
-    'jaipur-news': 'https://images.unsplash.com/photo-1562976542-91fd6e3e5b68?w=300&h=200&fit=crop&q=80', // Amer Fort
-  };
+  // const categoryImages: Record<string, string> = {
+  //   politics: 'https://images.unsplash.com/photo-1581985560556-83cddac94b23?w=300&h=200&fit=crop&q=80', // Indian parliament
+  //   business: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=300&h=200&fit=crop&q=80', // Jaipur markets
+  //   technology: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=300&h=200&fit=crop&q=80', // Indian tech
+  //   health: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=300&h=200&fit=crop&q=80', // Indian hospital
+  //   sports: 'https://images.unsplash.com/photo-1612872087727-0e4a2f34b6c7?w=300&h=200&fit=crop&q=80', // Cricket in Rajasthan
+  //   entertainment: 'https://images.unsplash.com/photo-1548032885-b5e38734688a?w=300&h=200&fit=crop&q=80', // Bollywood/Rajasthani culture
+  //   world: 'https://images.unsplash.com/photo-1587017539507-7c6c0e58a5b0?w=300&h=200&fit=crop&q=80', // Global with Indian context
+  //   lifestyle: 'https://images.unsplash.com/photo-1556909114-ff6a48d6c48c?w=300&h=200&fit=crop&q=80', // Rajasthani lifestyle
+  //   education: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=300&h=200&fit=crop&q=80',
+  //   environment: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=300&h=200&fit=crop&q=80',
+  //   crime: 'https://images.unsplash.com/photo-1563986768604-420e8d58a9dc?w=300&h=200&fit=crop&q=80',
+  //   travel: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=300&h=200&fit=crop&q=80',
+  //   general: 'https://images.unsplash.com/photo-1591276323627-4c71d2e0e8a8?w=300&h=200&fit=crop&q=80', // Rajasthani landscape
+  //   'rajasthan-news': 'https://images.unsplash.com/photo-1548013146-72479768bada?w=300&h=200&fit=crop&q=80', // Hawa Mahal
+  //   'jaipur-news': 'https://images.unsplash.com/photo-1562976542-91fd6e3e5b68?w=300&h=200&fit=crop&q=80', // Amer Fort
+  // };
 
   // Trending categories with Rajasthani focus
   const trendingCategories = ['rajasthan-news', 'jaipur-news', 'politics', 'sports'];
@@ -51,20 +72,32 @@ const CategorySidebar = () => {
             <Zap className="w-6 h-6 text-white" fill="white" />
           </div>
           <div>
-            <h3 className="text-2xl font-bold text-[#172C64] font-serif tracking-tight">श्रेणियाँ</h3>
+            <h3 className="text-2xl font-bold text-[#172C64] font-serif tracking-tight">Categories</h3>
            
           </div>
         </div>
-        <Badge 
+        {/* <Badge 
           className="bg-[#172C64] text-white border-[#172C64] hover:bg-[#172C64]/90 px-3 py-1"
         >
           {categories.length} Categories
-        </Badge>
+        </Badge> */}
       </div>
 
       {/* Categories list with improved visual hierarchy */}
       <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
-        {categories.map((category, index) => {
+        {loading ? (
+          <div className="space-y-3">
+            {[...Array(5)].map((_, index) => (
+              <div key={index} className="flex items-center gap-4 p-4 rounded-xl bg-white border border-[#172C64]/10 animate-pulse">
+                {/* <div className="w-20 h-20 bg-gray-200 rounded-xl"></div> */}
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : categories.length > 0 ? (
+          categories.map((category, index) => {
           const isTrending = trendingCategories.includes(category.slug);
           const isHot = hotCategories.includes(category.slug);
           const gradientClass = getCategoryColor(category.slug);
@@ -78,18 +111,7 @@ const CategorySidebar = () => {
               
               
               {/* Category image with Rajasthani frame */}
-              <div className="relative w-20 h-20 shrink-0 overflow-hidden rounded-xl border-2 border-[#172C64]/10 group-hover:border-[#F05C03]/30 transition-colors">
-                <Image
-                  src={categoryImages[category.slug] || categoryImages.general}
-                  alt={category.name}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  sizes="80px"
-                />
-                {/* Rajasthani pattern overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#172C64]/30 via-transparent to-transparent" />
-                
-              </div>
+             
 
               {/* Category info */}
               <div className="flex-1 min-w-0">
@@ -102,7 +124,10 @@ const CategorySidebar = () => {
               </div>
             </Link>
           );
-        })}
+        })
+        ) : (
+          <p className="text-gray-500 text-center py-4 text-sm">No categories available</p>
+        )}
       </div>
 
       

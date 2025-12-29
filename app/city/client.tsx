@@ -1,6 +1,6 @@
 "use client"
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Layout from '@/components/layout/Layout';
@@ -9,36 +9,34 @@ import CategorySidebar from '@/components/news/CategorySidebar';
 import SocialFollowCard from '@/components/news/SocialFollowCard';
 import NewsletterCard from '@/components/news/NewsletterCard';
 import TopStoriesSidebar from '@/components/news/TopStoriesSidebar';
-import { getCategories, getCategoryArticles } from '@/lib/api';
+import { getCityArticles } from '@/lib/api';
 import { ChevronRight, ArrowRight, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { generateSlug } from '@/lib/utils';
 
 const ITEMS_PER_PAGE = 10;
 
-const CategoryPage = () => {
-  const { slug } = useParams<{ slug: string }>();
+const CityPage = () => {
+  const { cityname } = useParams<{ cityname: string }>();
   const searchParams = useSearchParams();
   const router = useRouter();
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
   
-  const [categories, setCategories] = useState<any[]>([]);
-  const [loadingCategories, setLoadingCategories] = useState(true);
-  const [categoryArticles, setCategoryArticles] = useState<any[]>([]);
+  const [cityArticles, setCityArticles] = useState<any[]>([]);
   const [loadingArticles, setLoadingArticles] = useState(true);
   
-  // Helper function to get category name from object or string
-  const getCategoryName = (category: any): string => {
-    if (!category) return '';
-    if (typeof category === 'string') return category;
-    if (typeof category === 'object') {
-      return category.name || category.title || category.slug || '';
-    }
-    return '';
+  // Format city name for display
+  const getCityDisplayName = (citySlug: string): string => {
+    if (!citySlug) return '';
+    return citySlug
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   };
 
-  const category = categories.find((c) => c.slug === slug);
-  const allArticles = categoryArticles.length > 0 ? categoryArticles : [];
+  const cityDisplayName = cityname ? getCityDisplayName(cityname as string) : '';
+
+  const allArticles = cityArticles.length > 0 ? cityArticles : [];
 
   // Calculate pagination - ensure currentPage is valid
   const totalPages = Math.max(1, Math.ceil(allArticles.length / ITEMS_PER_PAGE));
@@ -47,54 +45,44 @@ const CategoryPage = () => {
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const paginatedArticles = allArticles.slice(startIndex, endIndex);
 
-  // Generate page numbers to display - improved logic
+  // Generate page numbers to display
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
-    const maxVisible = 7; // Show up to 7 page numbers
+    const maxVisible = 7;
     
     if (totalPages <= maxVisible) {
-      // Show all pages if total is less than max visible
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
       const current = validPage;
-      
-      // Always show first page
       pages.push(1);
       
-      // Calculate start and end of visible range
       let start = Math.max(2, current - 2);
       let end = Math.min(totalPages - 1, current + 2);
       
-      // Adjust if we're near the beginning
       if (current <= 4) {
         start = 2;
         end = Math.min(5, totalPages - 1);
       }
       
-      // Adjust if we're near the end
       if (current >= totalPages - 3) {
         start = Math.max(2, totalPages - 4);
         end = totalPages - 1;
       }
       
-      // Add ellipsis after first page if needed
       if (start > 2) {
         pages.push('...');
       }
       
-      // Add pages in the visible range
       for (let i = start; i <= end; i++) {
         pages.push(i);
       }
       
-      // Add ellipsis before last page if needed
       if (end < totalPages - 1) {
         pages.push('...');
       }
       
-      // Always show last page
       pages.push(totalPages);
     }
     
@@ -103,43 +91,30 @@ const CategoryPage = () => {
 
   const pageNumbers = getPageNumbers();
 
-  // Fetch categories and category articles
+  // Fetch city articles
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setLoadingCategories(true);
-        const data = await getCategories();
-        setCategories(data);
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-        setCategories([]);
-      } finally {
-        setLoadingCategories(false);
-      }
-    };
-
-    const fetchCategoryArticles = async () => {
-      if (!slug) {
-        setCategoryArticles([]);
+    const fetchCityArticles = async () => {
+      if (!cityname) {
+        setCityArticles([]);
         setLoadingArticles(false);
         return;
       }
       
       try {
         setLoadingArticles(true);
-        const data = await getCategoryArticles(slug, 100); // Fetch more for pagination
-        setCategoryArticles(data);
+        const decodedCityName = decodeURIComponent(cityname as string);
+        const data = await getCityArticles(decodedCityName, 100); // Fetch more for pagination
+        setCityArticles(data);
       } catch (error) {
-        console.error('Error fetching category articles:', error);
-        setCategoryArticles([]);
+        console.error('Error fetching city articles:', error);
+        setCityArticles([]);
       } finally {
         setLoadingArticles(false);
       }
     };
 
-    fetchCategories();
-    fetchCategoryArticles();
-  }, [slug]);
+    fetchCityArticles();
+  }, [cityname]);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages && page !== validPage) {
@@ -149,21 +124,21 @@ const CategoryPage = () => {
       } else {
         params.set('page', page.toString());
       }
-      router.push(`/category/${slug}${params.toString() ? `?${params.toString()}` : ''}`);
+      router.push(`/city/${cityname}${params.toString() ? `?${params.toString()}` : ''}`);
     }
   };
   
   // Redirect if page is out of bounds
   useEffect(() => {
-    if (currentPage > totalPages && totalPages > 0 && slug && allArticles.length > 0) {
+    if (currentPage > totalPages && totalPages > 0 && cityname && allArticles.length > 0) {
       const params = new URLSearchParams(searchParams.toString());
       params.set('page', totalPages.toString());
-      router.push(`/category/${slug}?${params.toString()}`);
+      router.push(`/city/${cityname}?${params.toString()}`);
     }
-  }, [currentPage, totalPages, slug, router, searchParams, allArticles.length]);
+  }, [currentPage, totalPages, cityname, router, searchParams, allArticles.length]);
   
   // Show message if no articles (only when not loading)
-  if (!loadingArticles && !loadingCategories && allArticles.length === 0) {
+  if (!loadingArticles && allArticles.length === 0) {
     return (
       <Layout>
         <div className="bg-secondary">
@@ -174,14 +149,14 @@ const CategoryPage = () => {
               </Link>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
               <span className="text-foreground text-orange-600 font-medium">
-                {category?.name || 'All News'}
+                {cityDisplayName}
               </span>
             </nav>
           </div>
         </div>
         <div className="news-container py-16 text-center">
           <h1 className="text-2xl font-serif font-bold mb-4">No Articles Found</h1>
-          <p className="text-muted-foreground mb-6">There are no articles in this category yet.</p>
+          <p className="text-muted-foreground mb-6">There are no articles available for {cityDisplayName} yet.</p>
           <Link href="/">
             <Button>Return to Home</Button>
           </Link>
@@ -201,7 +176,7 @@ const CategoryPage = () => {
             </Link>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
             <span className="text-orange-600 font-medium">
-              {category?.name || 'All News'}
+              {cityDisplayName}
             </span>
           </nav>
         </div>
@@ -223,7 +198,7 @@ const CategoryPage = () => {
           {/* Main Content */}
           <main className="lg:col-span-9 order-1 lg:order-2">
             <h1 className="section-title text-2xl mb-8">
-              {loadingCategories ? 'Loading...' : (category?.name || 'All News')}
+              {loadingArticles ? 'Loading...' : `${cityDisplayName} News`}
             </h1>
 
             {loadingArticles ? (
@@ -271,21 +246,25 @@ const CategoryPage = () => {
 
                   {/* Content */}
                   <div className="flex-1">
-                    <span className="category-badge mb-3">{getCategoryName(article.category)}</span>
-                    <Link href={`/article/${article.slug || article.id}`}>
-                      <h2 className="font-serif text-xl font-bold  text-black hover:text-primary transition-colors mb-3">
+                    <span className="category-badge mb-3">
+                      {typeof article.category === 'object' 
+                        ? article.category.name || article.category.title || ''
+                        : article.category || 'News'}
+                    </span>
+                    <Link href={`/article/${article.slug || generateSlug(article.title)}`}>
+                      <h2 className="font-serif text-xl font-bold text-black hover:text-primary transition-colors mb-3">
                         {article.title}
                       </h2>
                     </Link>
                     <div className="news-meta mb-3">
-                      <span>{new Date(article.created_at).toLocaleDateString("en-IN",{
+                      <span>{new Date(article.created_at || article.date).toLocaleDateString("en-IN",{
                         day: '2-digit',
                         month: 'short',
                         year: 'numeric',
                       })}</span>
                     </div>
                     <p className="text-muted-foreground mb-4 line-clamp-3">
-                      {article.excerpt}
+                      {article.excerpt || article.description}
                     </p>
                     <Link
                       href={`/article/${article.slug || generateSlug(article.title)}`}
@@ -365,4 +344,6 @@ const CategoryPage = () => {
   );
 };
 
-export default CategoryPage;
+export default CityPage;
+
+

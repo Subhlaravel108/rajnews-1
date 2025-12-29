@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import CategoryPage from '../client';
-import { categories } from '@/data/newsData';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -8,28 +7,23 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const category = categories.find((c) => c.slug === slug);
-
-  if (!category) {
-    return {
-      title: 'Category Not Found | Rajasthani News',
-      description: 'The category you are looking for does not exist.',
-    };
-  }
+  
+  // Generate metadata based on slug (can be enhanced with API call if needed)
+  const categoryName = slug.charAt(0).toUpperCase() + slug.slice(1);
 
   return {
-    title: `${category.name} News | Rajasthani News`,
-    description: `Latest ${category.name} news, articles, and updates from Rajasthani News. Stay informed with the most recent ${category.name.toLowerCase()} stories.`,
-    keywords: [category.name, 'news', 'rajasthani news', category.slug],
+    title: `${categoryName} News | Rajasthani News`,
+    description: `Latest ${categoryName} news, articles, and updates from Rajasthani News. Stay informed with the most recent ${categoryName.toLowerCase()} stories.`,
+    keywords: [categoryName, 'news', 'rajasthani news', slug],
     openGraph: {
-      title: `${category.name} News | Rajasthani News`,
-      description: `Latest ${category.name} news and articles`,
+      title: `${categoryName} News | Rajasthani News`,
+      description: `Latest ${categoryName} news and articles`,
       type: 'website',
     },
     twitter: {
       card: 'summary',
-      title: `${category.name} News | Rajasthani News`,
-      description: `Latest ${category.name} news and articles`,
+      title: `${categoryName} News | Rajasthani News`,
+      description: `Latest ${categoryName} news and articles`,
     },
   };
 }

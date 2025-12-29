@@ -1,9 +1,10 @@
 "use client"
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Menu, X, Facebook, Twitter, Instagram, Youtube, Search, User, ChevronDown, Bell, Newspaper, Globe, Phone } from 'lucide-react';
-import { categories } from '@/data/newsData';
+import { getCategories } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -14,6 +15,8 @@ const Header = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [currentDate, setCurrentDate] = useState('');
   const [currentTime, setCurrentTime] = useState('');
+  const [categories, setCategories] = useState<any[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -46,6 +49,23 @@ const Header = () => {
     updateDateTime();
     const interval = setInterval(updateDateTime, 60000);
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoadingCategories(true);
+        const data = await getCategories(false); // false = exclude subcategories
+        setCategories(data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        setCategories([]);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
   }, []);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -113,22 +133,14 @@ const Header = () => {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center group">
-              <div className="relative">
-                <div className="flex flex-col items-start">
-                  <span className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-[#172C64] via-[#9A1C20] to-[#F05C03] bg-clip-text text-transparent font-serif">
-                    Rajasthan
-                  </span>
-                  <div className="flex items-center gap-2 -mt-2">
-                    <span className="text-xl sm:text-2xl font-black text-[#1A1A1A] tracking-wider">
-                      समाचार
-                    </span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 bg-gradient-to-r from-[#F05C03] to-[#F0C24C] text-white rounded-full">
-                      LIVE
-                    </span>
-                  </div>
-                </div>
-                <div className="absolute -bottom-1 left-0 w-0 group-hover:w-full h-0.5 bg-[#F05C03] transition-all duration-300"></div>
-              </div>
+              <Image
+                src="/raj_news_logo.png"
+                alt="Rajasthan News Logo"
+                width={180}
+                height={60}
+                className="h-12 md:h-14 w-auto object-contain"
+                priority
+              />
             </Link>
 
             {/* Date & Time - Rajasthani Style */}
@@ -147,9 +159,9 @@ const Header = () => {
             </div>
 
             {/* Right Section - Search & Actions */}
-            <div className="flex items-center gap-3">
+            {/* <div className="flex items-center gap-3"> */}
               {/* Search */}
-              <div className="relative">
+              {/* <div className="relative">
                 <button
                   onClick={() => setShowSearch(!showSearch)}
                   className="p-2 hover:bg-[#F8F4E9] rounded-full transition-colors"
@@ -178,19 +190,19 @@ const Header = () => {
                     </form>
                   </div>
                 )}
-              </div>
+              </div> */}
 
               {/* E-Paper Button */}
-              <Button
+              {/* <Button
                 size="sm"
                 className="hidden md:flex h-10 bg-gradient-to-r from-[#172C64] to-[#2D4A8C] hover:from-[#2D4A8C] hover:to-[#172C64] text-white text-sm font-semibold gap-2"
               >
                 <Newspaper className="w-4 h-4" />
                 E-Paper
-              </Button>
+              </Button> */}
 
               {/* User Login */}
-              <Button 
+              {/* <Button 
                 variant="outline" 
                 size="sm" 
                 className="h-10 border-[#172C64]/30 text-[#172C64] hover:bg-[#172C64] hover:text-white text-sm gap-2"
@@ -200,7 +212,7 @@ const Header = () => {
                   <User className="w-4 h-4" />
                   <span className="hidden sm:inline">Login</span>
                 </Link>
-              </Button>
+              </Button> */}
 
               {/* Mobile Menu Button */}
               <button
@@ -214,17 +226,17 @@ const Header = () => {
                   <Menu className="w-6 h-6 text-[#172C64]" />
                 )}
               </button>
-            </div>
+            {/* </div> */}
           </div>
         </div>
       </div>
 
       {/* Main Navigation */}
       <nav className={`bg-gradient-to-r from-[#172C64] via-[#2D4A8C] to-[#172C64] text-white shadow-lg transition-all duration-300 ${isScrolled ? 'sticky top-0' : ''}`}>
-        <div className="container mx-auto px-5">
+        <div className="container mx-auto px-5 ">
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center justify-between">
-            <div className="flex items-center">
+            <div className="flex items-center justify-center gap-5 w-full">
               <Link
                 href="/"
                 className={`nav-link px-4 py-3 font-medium ${pathname === '/' ? 'bg-[#F05C03] text-white' : 'hover:bg-[#F05C03]/20'}`}
@@ -233,19 +245,29 @@ const Header = () => {
               </Link>
               
               {/* Main Categories */}
-              {categories.slice(0, 8).map((category) => (
-                <div key={category.id} className="relative group">
-                  <Link
-                    href={`/category/${category.slug}`}
-                    className={`nav-link px-4 py-3 font-medium flex items-center gap-1 ${
-                      pathname === `/category/${category.slug}` ? 'bg-[#F05C03] text-white' : 'hover:bg-[#F05C03]/20'
-                    }`}
-                  >
-                    {category.name}
-                    {category.hasSubmenu && (
-                      <ChevronDown className="w-3 h-3 opacity-70" />
-                    )}
-                  </Link>
+              {loadingCategories ? (
+                // Loading skeleton for categories
+                <>
+                  {[...Array(8)].map((_, index) => (
+                    <div key={index} className="px-4 py-3">
+                      <div className="h-4 w-20 bg-white/20 rounded animate-pulse"></div>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                categories.slice(0, 8).map((category) => (
+                  <div key={category.id} className="relative group">
+                    <Link
+                      href={`/category/${category.slug}`}
+                      className={`nav-link px-4 py-3 font-medium flex items-center gap-1 ${
+                        pathname === `/category/${category.slug}` ? 'bg-[#F05C03] text-white' : 'hover:bg-[#F05C03]/20'
+                      }`}
+                    >
+                      {category.name}
+                      {category.hasSubmenu && (
+                        <ChevronDown className="w-3 h-3 opacity-70" />
+                      )}
+                    </Link>
                   
                   {/* Dropdown */}
                   {category.hasSubmenu && (
@@ -275,8 +297,9 @@ const Header = () => {
                       </div>
                     </div>
                   )}
-                </div>
-              ))}
+                  </div>
+                ))
+              )}
               
               {/* Special Sections */}
               
@@ -291,21 +314,21 @@ const Header = () => {
             </div>
             
             {/* CTA Buttons */}
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <Button 
                 size="sm" 
                 className="h-9 bg-gradient-to-r from-[#F05C03] to-[#F0C24C] hover:from-[#F0C24C] hover:to-[#F05C03] text-white text-sm font-semibold"
               >
                 Subscribe Now
               </Button>
-            </div>
+            </div> */}
           </div>
 
           {/* Mobile Navigation */}
           {isMenuOpen && (
             <div className="lg:hidden bg-white text-gray-800 shadow-2xl rounded-b-xl border-t border-[#172C64]/20">
               {/* Search in Mobile */}
-              <div className="p-4 border-b border-[#172C64]/10">
+              {/* <div className="p-4 border-b border-[#172C64]/10">
                 <form onSubmit={handleSearch} className="relative">
                   <Input
                     type="search"
@@ -321,7 +344,7 @@ const Header = () => {
                     <Search className="h-5 w-5 text-[#4A5568]" />
                   </button>
                 </form>
-              </div>
+              </div> */}
               
               {/* Categories */}
               <div className="max-h-[60vh] overflow-y-auto">
@@ -334,18 +357,29 @@ const Header = () => {
                     Home
                   </Link>
                   
-                  {categories.map((category) => (
-                    <Link
-                      key={category.id}
-                      href={`/category/${category.slug}`}
-                      className="mobile-nav-link flex items-center px-4 py-3 hover:bg-[#F8F4E9] rounded-lg text-[#1A1A1A] hover:text-[#F05C03] transition-colors"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      {category.name}
-                    </Link>
-                  ))}
+                  {loadingCategories ? (
+                    // Loading skeleton for mobile menu
+                    <>
+                      {[...Array(8)].map((_, index) => (
+                        <div key={index} className="px-4 py-3">
+                          <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    categories.map((category) => (
+                      <Link
+                        key={category.id}
+                        href={`/category/${category.slug}`}
+                        className="mobile-nav-link flex items-center px-4 py-3 hover:bg-[#F8F4E9] rounded-lg text-[#1A1A1A] hover:text-[#F05C03] transition-colors"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        {category.name}
+                      </Link>
+                    ))
+                  )}
                   
-                  <div className="border-t border-[#172C64]/10 mt-4 pt-4">
+                  {/* <div className="border-t border-[#172C64]/10 mt-4 pt-4">
                     <Link
                       href="/live-tv"
                       className="mobile-nav-link flex items-center px-4 py-3 hover:bg-[#F8F4E9] rounded-lg text-[#F05C03] font-semibold"
@@ -368,7 +402,7 @@ const Header = () => {
                     >
                       Subscribe
                     </Link>
-                  </div>
+                  </div> */}
                 </div>
               </div>
               
