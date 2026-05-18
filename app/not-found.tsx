@@ -5,7 +5,7 @@ import { Home } from 'lucide-react';
 
 const NotFound = () => {
   const pathname = usePathname();
-
+ 
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
       <div className="max-w-md w-full text-center space-y-6">

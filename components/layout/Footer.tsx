@@ -216,7 +216,7 @@ const Footer = () => {
                   href={`/city/${getCitySlug(city)}`}
                   className="px-3 py-2 bg-white/5 hover:bg-white/10 text-white/80 hover:text-white text-sm rounded-lg text-center transition-colors"
                 >
-                  {city}
+                  {city} News
                 </Link>
               ))}
             </div>
