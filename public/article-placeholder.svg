@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" role="img" aria-label="News placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#172C64"/>
+      <stop offset="55%" style="stop-color:#2D4A8C"/>
+      <stop offset="100%" style="stop-color:#1a1f3a"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <g fill="none" stroke="#F0C24C" stroke-width="3" opacity="0.9">
+    <rect x="240" y="180" width="320" height="240" rx="12" ry="12" fill="rgba(240,194,76,0.08)"/>
+    <path d="M280 220 L352 292 L424 220 L520 316 L520 380 L280 380 Z" stroke-linejoin="round"/>
+    <circle cx="330" cy="250" r="28"/>
+  </g>
+  <text x="400" y="470" text-anchor="middle" fill="#F0C24C" font-family="system-ui,sans-serif" font-size="28" font-weight="600">Rajasthani News</text>
+</svg>

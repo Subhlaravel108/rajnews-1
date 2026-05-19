@@ -5,6 +5,8 @@ export interface Article {
   excerpt: string;
   content: string;
   category: string;
+  /** Present when article comes from listing/detail API */
+  category_data?: { name: string; slug: string };
   author: string;
   date: string;
   image: string;

@@ -143,15 +143,15 @@ const Header = () => {
               />
             </Link>
 
-            {/* Date & Time - Rajasthani Style */}
-            <div className="hidden lg:flex flex-col items-center">
+            {/* Date & Time — values only after mount so SSR and first client paint match */}
+            <div className="hidden lg:flex flex-col items-center" suppressHydrationWarning>
               <div className="text-sm font-medium text-[#172C64]">
-                {currentDate || 'Loading...'}
+                {currentDate || '\u00A0'}
               </div>
               <div className="text-xs text-[#4A5568] font-medium flex items-center gap-2 mt-1">
                 <span className="flex items-center gap-1">
                   <Globe className="w-3 h-3" />
-                  {currentTime || ''}
+                  {currentTime || '\u00A0'}
                 </span>
                 <span>•</span>
                 <span className="text-[#F05C03]">जयपुर, राजस्थान</span>
@@ -214,11 +214,13 @@ const Header = () => {
                 </Link>
               </Button> */}
 
-              {/* Mobile Menu Button */}
+              {/* Mobile Menu Button — suppressHydrationWarning: extensions (e.g. form fillers) may inject attrs like fdprocessedid before hydrate */}
               <button
+                type="button"
                 className="lg:hidden p-2 hover:bg-[#F8F4E9] rounded-md transition-colors"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 aria-label="Toggle menu"
+                suppressHydrationWarning
               >
                 {isMenuOpen ? (
                   <X className="w-6 h-6 text-[#172C64]" />

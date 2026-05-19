@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
     return [{ source: "/index", destination: "/", permanent: true }];
   },
   images: {
+    // Allow next/image to fetch media served on private/LAN IPs (e.g. Laravel storage).
+    // Safe for self-hosted stacks; avoid on public multi-tenant apps.
+    dangerouslyAllowLocalIP: true,
     remotePatterns: [
       {
         protocol: "https",
@@ -19,7 +22,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'http',
-        hostname: '10.95.4.86',
+        hostname: '192.168.29.186',
         port: '8000',
         pathname: '/storage/**',
       },

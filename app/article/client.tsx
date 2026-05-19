@@ -10,11 +10,10 @@ import SocialFollowCard from '@/components/news/SocialFollowCard';
 import NewsletterCard from '@/components/news/NewsletterCard';
 import TopStoriesSidebar from '@/components/news/TopStoriesSidebar';
 import ArticleCard from '@/components/news/ArticleCard';
-import { getArticleBySlug } from '@/lib/api';
-import { getCategoryArticles } from '@/lib/api';
+import { getArticleBySlug, getCategoryArticles, getCategoryArticlesById, getCategories, ARTICLE_FALLBACK_IMAGE, isApiMediaOrigin, resolveArticleImageUrl } from '@/lib/api';
 import { Calendar, User, Clock, ChevronRight, Facebook, Twitter, Linkedin, Share2, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { generateSlug } from '@/lib/utils';
+import { articleHref } from '@/lib/utils';
 
 const ArticlePage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -23,17 +22,9 @@ const ArticlePage = () => {
   const [loading, setLoading] = useState(true);
   const [prevArticle, setPrevArticle] = useState<any>(null);
   const [nextArticle, setNextArticle] = useState<any>(null);
+  const [categoryMeta, setCategoryMeta] = useState<{ name: string; slug: string }>({ name: '', slug: '' });
 
   // Helper functions
-  const getCategoryName = (category: any): string => {
-    if (!category) return '';
-    if (typeof category === 'string') return category;
-    if (typeof category === 'object') {
-      return category.name || category.title || category.slug || '';
-    }
-    return '';
-  };
-
   const getAuthorName = (author: any): string => {
     if (!author) return 'Unknown';
     if (typeof author === 'string') return author;
@@ -107,38 +98,83 @@ const ArticlePage = () => {
         
         if (articleData) {
           setArticle(articleData);
-          
-          // Fetch related articles from the same category
-          const categorySlug = typeof articleData.category === 'object' 
-            ? articleData.category.slug || articleData.category.name?.toLowerCase() 
-            : articleData.category?.toLowerCase() || '';
-          
-          if (categorySlug) {
-            const categoryArticles = await getCategoryArticles(categorySlug, 10);
-            // Decode slug for comparison
-            const decodedSlug = decodeURIComponent(slug as string);
-            // Filter out current article and get related ones
+
+          let catName =
+            articleData.category_data?.name ||
+            (typeof articleData.category === 'object' && articleData.category
+              ? articleData.category.name || articleData.category.title || ''
+              : '');
+          let catSlug =
+            articleData.category_data?.slug ||
+            (typeof articleData.category === 'object' && articleData.category
+              ? articleData.category.slug || ''
+              : '');
+
+          if ((!catName || !catSlug) && typeof articleData.category === 'number') {
+            const cats = await getCategories(true);
+            const c = cats.find((x: any) => Number(x.id) === articleData.category);
+            if (c) {
+              catName = catName || c.name || '';
+              catSlug = catSlug || (c.slug ? String(c.slug) : '');
+            }
+          }
+
+          if (!catSlug && typeof articleData.category === 'string') {
+            catName = catName || articleData.category;
+            catSlug = articleData.category.toLowerCase().trim().replace(/\s+/g, '-');
+          }
+
+          setCategoryMeta({ name: catName, slug: catSlug });
+
+          let categoryArticles: Awaited<ReturnType<typeof getCategoryArticles>> = [];
+          if (typeof articleData.category === 'number') {
+            categoryArticles = await getCategoryArticlesById(articleData.category, 100);
+          } else {
+            const slugForList =
+              catSlug ||
+              (typeof articleData.category === 'object'
+                ? articleData.category.slug ||
+                  articleData.category.name?.toLowerCase().replace(/\s+/g, '-') ||
+                  ''
+                : typeof articleData.category === 'string'
+                  ? articleData.category.toLowerCase()
+                  : '');
+            if (slugForList) {
+              categoryArticles = await getCategoryArticles(slugForList, 100);
+            }
+          }
+
+          if (categoryArticles.length > 0) {
             const related = categoryArticles
               .filter((a: any) => {
-                const articleSlug = a.slug || generateSlug(a.title);
-                return articleSlug !== decodedSlug && articleSlug !== slug;
+                const s = typeof a.slug === 'string' ? a.slug.trim() : '';
+                return s !== '' && s !== decodedSlug && s !== slug;
               })
               .slice(0, 3);
             setRelatedArticles(related);
-            
-            // Find previous and next articles
+
             const currentIndex = categoryArticles.findIndex((a: any) => {
-              const articleSlug = a.slug || generateSlug(a.title);
-              return articleSlug === decodedSlug || articleSlug === slug;
+              const s = typeof a.slug === 'string' ? a.slug.trim() : '';
+              return s !== '' && (s === decodedSlug || s === slug);
             });
-            
-            if (currentIndex > 0) {
-              setPrevArticle(categoryArticles[currentIndex - 1]);
-            }
-            if (currentIndex < categoryArticles.length - 1 && currentIndex >= 0) {
-              setNextArticle(categoryArticles[currentIndex + 1]);
-            }
+
+            setPrevArticle(currentIndex > 0 ? categoryArticles[currentIndex - 1] : null);
+            setNextArticle(
+              currentIndex >= 0 && currentIndex < categoryArticles.length - 1
+                ? categoryArticles[currentIndex + 1]
+                : null
+            );
+          } else {
+            setRelatedArticles([]);
+            setPrevArticle(null);
+            setNextArticle(null);
           }
+        } else {
+          setArticle(null);
+          setCategoryMeta({ name: '', slug: '' });
+          setRelatedArticles([]);
+          setPrevArticle(null);
+          setNextArticle(null);
         }
       } catch (error) {
         console.error('Error fetching article:', error);
@@ -183,9 +219,9 @@ const ArticlePage = () => {
     );
   }
 
-  const categoryName = getCategoryName(article.category);
   const authorName = getAuthorName(article.author);
   const articleDate = getTimeAgo(article.date || article.created_at);
+  const heroImageSrc = resolveArticleImageUrl(article) || ARTICLE_FALLBACK_IMAGE;
 
   return (
     <Layout>
@@ -198,10 +234,10 @@ const ArticlePage = () => {
             </Link>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
             <Link
-              href={`/category/${categoryName.toLowerCase().replace(/\s+/g, '-')}`}
+              href={categoryMeta.slug ? `/category/${categoryMeta.slug}` : '/'}
               className="text-black hover:text-primary"
             >
-              {categoryName}
+              {categoryMeta.name || 'News'}
             </Link>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
             <span className="text-orange-600 font-medium line-clamp-1">
@@ -217,7 +253,7 @@ const ArticlePage = () => {
           <main className="lg:col-span-8">
             <article>
               {/* Category Badge */}
-              <span className="category-badge mb-4">{categoryName}</span>
+              <span className="category-badge mb-4">{categoryMeta.name || 'News'}</span>
 
               {/* Title */}
               <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl font-bold text-black leading-tight mb-6">
@@ -259,13 +295,14 @@ const ArticlePage = () => {
               </div>
 
               {/* Featured Image */}
-              <div className="mb-8 rounded-lg overflow-hidden">
+              <div className="mb-8 rounded-lg overflow-hidden max-w-full">
                 <Image
-                  src={article.image}
+                  src={heroImageSrc}
                   alt={article.title}
                   width={800}
                   height={600}
-                  className="w-full h-auto object-cover"
+                  unoptimized={isApiMediaOrigin(heroImageSrc)}
+                  className="w-full max-w-full h-auto object-cover"
                   priority
                 />
               </div>
@@ -344,7 +381,7 @@ const ArticlePage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-6">
                 {prevArticle && (
                   <Link
-                    href={`/article/${prevArticle.slug || generateSlug(prevArticle.title)}`}
+                    href={articleHref(prevArticle)}
                     className="flex items-center gap-3 p-4 bg-secondary rounded-lg hover:bg-secondary/80 transition-colors"
                   >
                     <ChevronLeft className="w-5 h-5 text-muted-foreground shrink-0" />
@@ -356,7 +393,7 @@ const ArticlePage = () => {
                 )}
                 {nextArticle && (
                   <Link
-                    href={`/article/${nextArticle.slug || generateSlug(nextArticle.title)}`}
+                    href={articleHref(nextArticle)}
                     className="flex items-center gap-3 p-4 bg-secondary rounded-lg hover:bg-secondary/80 transition-colors md:text-right md:flex-row-reverse"
                   >
                     <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />

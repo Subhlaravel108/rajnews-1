@@ -30,6 +30,7 @@ const Index = () => {
         const data = await getLatestArticles(3);
         if (data && data.length > 0) {
           setFeaturedArticle(data[0]);
+          // console.log('Featured Article:', data);
           setSecondaryArticles(data.slice(1, 3));
         } else {
           setFeaturedArticle(null);

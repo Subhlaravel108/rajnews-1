@@ -4,7 +4,8 @@ import { Calendar, User, Clock, Eye, ArrowRight, Play } from 'lucide-react';
 import { Article } from '@/data/newsData';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { generateSlug } from '@/lib/utils';
+import { articleHref } from '@/lib/utils';
+import { ARTICLE_FALLBACK_IMAGE, isApiMediaOrigin, resolveArticleImageUrl } from '@/lib/api';
 
 interface ArticleCardProps {
   article: Article;
@@ -21,7 +22,9 @@ const ArticleCard = ({
   showCategory = true,
   showMeta = true
 }: any) => {
-  
+  const imageSrc = resolveArticleImageUrl(article) || ARTICLE_FALLBACK_IMAGE;
+  const apiImageUnoptimized = isApiMediaOrigin(imageSrc);
+
   // Helper functions to safely extract string values from API response
   const getCategoryName = (category: any): string => {
     if (!category) return '';
@@ -73,14 +76,15 @@ const ArticleCard = ({
   if (variant === 'video') {
     return (
       <Link 
-        href={`/article/${article.slug || generateSlug(article.title)}`} 
+        href={articleHref(article)} 
         className="group block relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#172C64] to-gray-900 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-200"
       >
         <div className="aspect-video overflow-hidden relative">
           <Image
-            src={article.image}
+            src={imageSrc}
             alt={article.title}
             fill
+            unoptimized={apiImageUnoptimized}
             className="object-cover transition-transform duration-700 group-hover:scale-110"
             sizes="(max-width: 768px) 100vw, 400px"
           />
@@ -144,14 +148,15 @@ const ArticleCard = ({
   if (variant === 'featured-secondary') {
     return (
       <Link 
-        href={`/article/${article.slug || generateSlug(article.title)}`} 
+        href={articleHref(article)} 
         className="group block relative overflow-hidden rounded-xl md:rounded-xl lg:rounded-2xl shadow-lg md:shadow-xl transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 border border-[#172C64]/20 md:border-[#172C64]/30 h-full"
       >
         <div className="aspect-video overflow-hidden relative">
           <Image
-            src={article.image}
+            src={imageSrc}
             alt={article.title}
             fill
+            unoptimized={apiImageUnoptimized}
             className="object-cover transition-transform duration-700 group-hover:scale-110"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
@@ -218,14 +223,15 @@ const ArticleCard = ({
   if (variant === 'featured') {
     return (
       <Link 
-        href={`/article/${article.slug || generateSlug(article.title)}`} 
+        href={articleHref(article)} 
         className="group block relative overflow-hidden rounded-lg md:rounded-xl lg:rounded-2xl shadow-xl md:shadow-2xl transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.4)] hover:-translate-y-1 border border-[#172C64]/20 md:border-2 md:border-[#172C64]/30 h-full"
       >
         <div className="aspect-video overflow-hidden relative">
           <Image
-            src={article.image}
+            src={imageSrc}
             alt={article.title}
             fill
+            unoptimized={apiImageUnoptimized}
             className="object-cover transition-transform duration-700 group-hover:scale-110"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             priority
@@ -258,7 +264,7 @@ const ArticleCard = ({
             </h2>
             
             {showExcerpt && (
-              <p className="text-white/95 text-xs md:text-sm lg:text-xs xl:text-sm mb-1.5 md:mb-2 lg:mb-1.5 xl:mb-2 line-clamp-2 leading-relaxed drop-shadow-md hidden 2xl:block">
+              <p className="text-white/95 text-xs md:text-sm lg:text-xs xl:text-sm mb-1.5 md:mb-2 lg:mb-1.5 xl:mb-2 line-clamp-2 leading-relaxed drop-shadow-md hidden 2xl:block break-words [overflow-wrap:anywhere]">
                 {article.excerpt}
               </p>
             )}
@@ -302,7 +308,7 @@ const ArticleCard = ({
   if (variant === 'breaking') {
     return (
       <Link 
-        href={`/article/${article.slug || generateSlug(article.title)}`} 
+        href={articleHref(article)} 
         className="group block relative overflow-hidden rounded-xl bg-gradient-to-r from-[#9A1C20]/15 to-[#F05C03]/10 border-l-4 border-[#9A1C20] p-5 hover:border-[#F05C03] transition-all duration-300 hover:shadow-lg bg-white hover:bg-gray-50"
       >
         <div className="flex items-start gap-4">
@@ -349,14 +355,15 @@ const ArticleCard = ({
   if (variant === 'horizontal') {
     return (
       <Link 
-        href={`/article/${article.slug || generateSlug(article.title)}`} 
+        href={articleHref(article)} 
         className="group flex gap-4 items-start p-4 rounded-xl bg-white hover:bg-gray-50 transition-all duration-300 border border-gray-200 hover:border-[#F05C03]/40 hover:shadow-md"
       >
         <div className="w-32 md:w-36 h-24 md:h-28 shrink-0 overflow-hidden rounded-lg relative border border-gray-200">
           <Image
-            src={article.image}
+            src={imageSrc}
             alt={article.title}
             fill
+            unoptimized={apiImageUnoptimized}
             className="object-cover transition-transform duration-500 group-hover:scale-110"
             sizes="144px"
           />
@@ -382,7 +389,7 @@ const ArticleCard = ({
           </h3>
           
           {showExcerpt && (
-            <p className="text-gray-600 text-xs md:text-sm mb-2 line-clamp-2 leading-relaxed">
+            <p className="text-gray-600 text-xs md:text-sm mb-2 line-clamp-2 leading-relaxed break-words [overflow-wrap:anywhere]">
               {article.excerpt}
             </p>
           )}
@@ -409,7 +416,7 @@ const ArticleCard = ({
   if (variant === 'small') {
     return (
       <Link 
-        href={`/article/${article.slug || generateSlug(article.title)}`} 
+        href={articleHref(article)} 
         className="group flex gap-3 items-start py-3 border-b border-gray-200 last:border-b-0 hover:bg-gray-50 px-2 rounded-lg transition-colors duration-200"
       >
         <div className="flex-1 min-w-0">
@@ -439,17 +446,16 @@ const ArticleCard = ({
           )}
         </div> 
         
-        {article.image && (
-          <div className="w-20 h-14 shrink-0 overflow-hidden rounded-md relative border border-gray-200">
-            <Image
-              src={article.image}
-              alt={article.title}
-              fill
-              className="object-cover transition-transform duration-300 group-hover:scale-110"
-              sizes="80px"
-            />
-          </div>
-        )}
+        <div className="w-20 h-14 shrink-0 overflow-hidden rounded-md relative border border-gray-200">
+          <Image
+            src={imageSrc}
+            alt={article.title}
+            fill
+            unoptimized={apiImageUnoptimized}
+            className="object-cover transition-transform duration-300 group-hover:scale-110"
+            sizes="80px"
+          />
+        </div>
       </Link>
     );
   }
@@ -457,14 +463,15 @@ const ArticleCard = ({
   // Default variant - Updated
   return (
     <Link 
-      href={`/article/${article.slug || generateSlug(article.title)}`} 
+      href={articleHref(article)} 
       className="group block relative overflow-hidden rounded-2xl bg-white shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-gray-100"
     >
       <div className="overflow-hidden relative aspect-[4/3]">
         <Image
-          src={article.image}
+          src={imageSrc}
           alt={article.title}
           fill
+          unoptimized={apiImageUnoptimized}
           className="object-cover transition-transform duration-700 group-hover:scale-110"
           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
@@ -497,7 +504,7 @@ const ArticleCard = ({
         </h3>
         
         {showExcerpt && (
-          <p className="text-gray-600 text-sm md:text-base mb-4 line-clamp-3 leading-relaxed">
+          <p className="text-gray-600 text-sm md:text-base mb-4 line-clamp-3 leading-relaxed break-words [overflow-wrap:anywhere]">
             {article.excerpt}
           </p>
         )}

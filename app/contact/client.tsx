@@ -132,7 +132,7 @@ const ContactPage = () => {
         message: formData.message.trim()
       });
 
-      if (result.success) {
+      if (result.status) {
         setSubmitStatus({
           type: 'success',
           message: result.message
@@ -206,7 +206,7 @@ const ContactPage = () => {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6" suppressHydrationWarning>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">

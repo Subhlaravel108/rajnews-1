@@ -9,10 +9,11 @@ import CategorySidebar from '@/components/news/CategorySidebar';
 import SocialFollowCard from '@/components/news/SocialFollowCard';
 import NewsletterCard from '@/components/news/NewsletterCard';
 import TopStoriesSidebar from '@/components/news/TopStoriesSidebar';
-import { getCityArticles } from '@/lib/api';
+import { getCityArticles, ARTICLE_FALLBACK_IMAGE, isApiMediaOrigin, resolveArticleImageUrl } from '@/lib/api';
+import { htmlToPlainText } from '@/lib/utils';
 import { ChevronRight, ArrowRight, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { generateSlug } from '@/lib/utils';
+import { articleHref } from '@/lib/utils';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -218,41 +219,38 @@ const CityPage = () => {
               </div>
             ) : (
               <div className="space-y-8">
-                {paginatedArticles.map((article) => (
+                {paginatedArticles.map((article) => {
+                const listImg = resolveArticleImageUrl(article) || ARTICLE_FALLBACK_IMAGE
+                return (
                 <article
                   key={article.id}
-                  className="flex flex-col md:flex-row gap-6 pb-8 border-b border-border"
+                  className="flex flex-col md:flex-row gap-6 pb-8 border-b border-border min-w-0"
                 >
                   {/* Image */}
                   <Link
-                    href={`/article/${article.slug || generateSlug(article.title)}`}
-                    className="md:w-1/3 shrink-0"
+                    href={articleHref(article)}
+                    className="md:w-1/3 shrink-0 min-w-0"
                   >
-                    <div className="aspect-4/3 overflow-hidden rounded-lg relative">
-                      {article.image ? (
-                        <Image
-                          src={article.image}
-                          alt={article.title || ''}
-                          fill
-                          className="object-cover transition-transform duration-300 hover:scale-105"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                          <span className="text-gray-400">No Image</span>
-                        </div>
-                      )}
+                    <div className="aspect-4/3 overflow-hidden rounded-lg relative bg-[#172C64]/10">
+                      <Image
+                        src={listImg}
+                        alt={htmlToPlainText(String(article.title || '')).slice(0, 200)}
+                        fill
+                        unoptimized={isApiMediaOrigin(listImg)}
+                        className="object-cover transition-transform duration-300 hover:scale-105"
+                      />
                     </div>
                   </Link>
 
                   {/* Content */}
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0 overflow-hidden">
                     <span className="category-badge mb-3">
-                      {typeof article.category === 'object' 
-                        ? article.category.name || article.category.title || ''
+                      {typeof article.category_data === 'object' 
+                        ? article.category_data.name || article.category_data.title || ''
                         : article.category || 'News'}
                     </span>
-                    <Link href={`/article/${article.slug || generateSlug(article.title)}`}>
-                      <h2 className="font-serif text-xl font-bold text-black hover:text-primary transition-colors mb-3">
+                    <Link href={articleHref(article)}>
+                      <h2 className="font-serif text-xl font-bold text-black hover:text-primary transition-colors mb-3 break-words line-clamp-3 [overflow-wrap:anywhere]">
                         {article.title}
                       </h2>
                     </Link>
@@ -263,11 +261,11 @@ const CityPage = () => {
                         year: 'numeric',
                       })}</span>
                     </div>
-                    <p className="text-muted-foreground mb-4 line-clamp-3">
-                      {article.excerpt || article.description}
+                    <p className="text-muted-foreground mb-4 line-clamp-3 break-words [overflow-wrap:anywhere]">
+                      {article.excerpt || htmlToPlainText(article.description || '')}
                     </p>
                     <Link
-                      href={`/article/${article.slug || generateSlug(article.title)}`}
+                      href={articleHref(article)}
                       className="inline-flex items-center gap-2 text-primary font-medium hover:text-accent transition-colors"
                     >
                       READ MORE
@@ -275,7 +273,8 @@ const CityPage = () => {
                     </Link>
                   </div>
                 </article>
-                ))}
+                );
+                })}
               </div>
             )}
 
@@ -294,7 +293,7 @@ const CityPage = () => {
                     size="sm"
                     onClick={() => handlePageChange(validPage - 1)}
                     disabled={validPage === 1}
-                    className="gap-1"
+                    className="gap-1 text-white cursor-pointer"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     Previous
@@ -313,10 +312,14 @@ const CityPage = () => {
                     return (
                       <Button
                         key={pageNum}
-                        variant={validPage === pageNum ? 'default' : 'outline'}
+                        variant="outline"
                         size="sm"
                         onClick={() => handlePageChange(pageNum)}
-                        className={validPage === pageNum ? 'bg-primary' : ''}
+                        className={
+                          validPage === pageNum
+                            ? 'min-w-9 shrink-0 border-[#F05C03] bg-[#F05C03] text-white hover:bg-[#F05C03]/90 hover:text-white cursor-pointer'
+                            : 'min-w-9 shrink-0 border-[#172C64] bg-[#172C64] text-white hover:bg-[#172C64]/90 hover:text-white cursor-pointer'
+                        }
                       >
                         {pageNum}
                       </Button>
@@ -329,7 +332,7 @@ const CityPage = () => {
                     size="sm"
                     onClick={() => handlePageChange(validPage + 1)}
                     disabled={validPage === totalPages}
-                    className="gap-1"
+                    className="gap-1 text-white cursor-pointer"
                   >
                     Next
                     <ArrowRight className="w-4 h-4" />
