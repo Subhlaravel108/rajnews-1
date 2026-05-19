@@ -1,17 +1,77 @@
 import axios from 'axios'
+import { Article } from '@/data/newsData'
+
+const API_BASE_URL = 'http://10.95.4.86:8000'
+const API_MEDIA_ORIGIN = API_BASE_URL
 
 const api = axios.create({
-    baseURL: "http://10.50.109.86:8000/api"
+    baseURL: `${API_BASE_URL}/api`,
 })
+
+const normalizeImageUrl = (url: string): string => {
+    if (!url) return ''
+    return url
+        .replace(/^https?:\/\/localhost:8000/i, API_MEDIA_ORIGIN)
+        .replace(/^https?:\/\/127\.0\.0\.1:8000/i, API_MEDIA_ORIGIN)
+}
+
+type NewsApiItem = {
+    id: number
+    slug: string
+    title: string
+    description?: string
+    is_featured?: boolean
+    is_top?: boolean
+    created_at: string
+    clicks?: number
+    category_data?: { name: string; slug: string }
+    author_user?: { name: string }
+    main_image?: {
+        image_urls?: {
+            image_url?: string
+            medium_url?: string
+            thumb_url?: string
+        }
+    }
+}
+
+const getNewsImageUrl = (item: NewsApiItem): string => {
+    const urls = item.main_image?.image_urls
+    const raw = urls?.medium_url || urls?.thumb_url || urls?.image_url || ''
+    return normalizeImageUrl(raw)
+}
+
+export const mapNewsItemToArticle = (item: NewsApiItem): Article & { created_at: string } => ({
+    id: String(item.id),
+    slug: item.slug,
+    title: item.title,
+    excerpt: item.description || '',
+    content: item.description || '',
+    category: item.category_data?.name || '',
+    author: item.author_user?.name || '',
+    date: item.created_at,
+    created_at: item.created_at,
+    image: getNewsImageUrl(item),
+    readTime: '5 min',
+    views: item.clicks,
+})
+
+const fetchNewsIndex = async (limit: number = 50, page: number = 1): Promise<NewsApiItem[]> => {
+    const response = await api.get('/NewsFront/index', { params: { limit, page } })
+    if (response.data.status && Array.isArray(response.data.data)) {
+        return response.data.data
+    }
+    return []
+}
 
 // Fetch top stories from API
 export const getTopStories = async (limit: number = 5) => {
     try {
-        const response = await api.get("/NewsFront/index");
-        if (response.data.success && response.data.data?.top) {
-            return response.data.data.top.slice(0, limit);
-        }
-        return [];
+        const items = await fetchNewsIndex(100)
+        return items
+            .filter((item) => item.is_top)
+            .slice(0, limit)
+            .map(mapNewsItemToArticle)
     } catch (error) {
         console.error('Error fetching top stories:', error);
         return [];
@@ -21,11 +81,11 @@ export const getTopStories = async (limit: number = 5) => {
 // Fetch featured articles from API
 export const getFeaturedArticles = async (limit: number = 4) => {
     try {
-        const response = await api.get("/NewsFront/index");
-        if (response.data.success && response.data.data?.featured) {
-            return response.data.data.featured.slice(0, limit);
-        }
-        return [];
+        const items = await fetchNewsIndex(100)
+        return items
+            .filter((item) => item.is_featured)
+            .slice(0, limit)
+            .map(mapNewsItemToArticle)
     } catch (error) {
         console.error('Error fetching featured articles:', error);
         return [];
@@ -35,26 +95,26 @@ export const getFeaturedArticles = async (limit: number = 4) => {
 // Fetch latest articles from API
 export const getLatestArticles = async (limit: number = 4) => {
     try {
-        const response = await api.get("/NewsFront/index");
-        if (response.data.success && response.data.data?.latest.data) {
-            return response.data.data.latest.data.slice(0, limit);
-        }
-        return [];
+        const items = await fetchNewsIndex(limit)
+        return items
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+            .slice(0, limit)
+            .map(mapNewsItemToArticle)
     } catch (error) {
         console.error('Error fetching latest articles:', error);
         return [];
     }
 }
 
-// Fetch category articles from API (generic function for politics, world, etc.)
+// Fetch category articles — filter from index by category slug
 export const getCategoryArticles = async (category: string, limit: number = 5) => {
     try {
-        const response = await api.get(`/NewsFront/category/${category}/news`);
-        if (response.data.success && response.data.data) {
-            const articles = Array.isArray(response.data.data) ? response.data.data : response.data.data.data || [];
-            return articles.slice(0, limit);
-        }
-        return [];
+        const slug = category.toLowerCase().trim()
+        const items = await fetchNewsIndex(200)
+        return items
+            .filter((item) => item.category_data?.slug?.toLowerCase() === slug)
+            .slice(0, limit)
+            .map(mapNewsItemToArticle)
     } catch (error) {
         console.error(`Error fetching ${category} articles:`, error);
         return [];
@@ -85,7 +145,7 @@ export const getBusinessArticles = async (limit: number = 5) => {
 export const getCategories = async (includeSubcategories: boolean = false) => {
     try {
         const response = await api.get("/NewsFront/categories");
-        if (response.data.success && response.data.data) {
+        if ((response.data.status || response.data.success) && response.data.data) {
             let categories = Array.isArray(response.data.data) ? response.data.data : [];
             // Filter out subcategories if not needed (subcategories have parent_id)
             if (!includeSubcategories) {

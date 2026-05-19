@@ -22,6 +22,7 @@ const TopStoriesSidebar = ({ title = 'Top Stories', limit = 5, type = 'top' }: T
           ? await getLatestArticles(limit)
           : await getTopStories(limit);
         setArticles(data || []);
+        // console.log("data", data);
       } catch (error) {
         console.error(`Error fetching ${type === 'latest' ? 'latest articles' : 'top stories'}:`, error);
         setArticles([]);
