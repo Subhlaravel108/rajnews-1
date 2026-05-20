@@ -296,7 +296,7 @@ export const getCityArticles = async (cityName: string, limit: number = 100) => 
         return [];
     }
 }
-
+ 
 // Fetch article by slug from API
 export const getArticleBySlug = async (slug: string) => {
     try {
