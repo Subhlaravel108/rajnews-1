@@ -2,7 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   async redirects() {
-    return [{ source: "/index", destination: "/", permanent: true }];
+    return [
+      { source: "/index", destination: "/", permanent: true },
+      { source: "/news/:slug", destination: "/article/:slug", permanent: false },
+    ];
   },
   images: {
     // Allow next/image to fetch media served on private/LAN IPs (e.g. Laravel storage).

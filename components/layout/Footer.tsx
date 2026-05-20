@@ -6,7 +6,7 @@ import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, Send } from 'lucide
 import { getCategories } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { CONTACT_INFO } from '@/lib/constants';
+import { CONTACT_INFO, SOCIAL_LINKS } from '@/lib/constants';
 
 const cities = [
   'Jaipur', 'Udaipur', 'Jodhpur', 'Ajmer', 'Bikaner', 'Jaisalmer',
@@ -166,16 +166,16 @@ const Footer = () => {
               {/* Social Media */}
               <div className="mb-6">
                 <div className="flex gap-2">
-                  <a href="#" className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center transition-colors">
+                  <a href={SOCIAL_LINKS.facebook} target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center transition-colors" aria-label="Facebook">
                     <Facebook className="w-5 h-5" />
                   </a>
-                  <a href="#" className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center transition-colors">
+                  <a href="#" className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center transition-colors" aria-label="Twitter">
                     <Twitter className="w-5 h-5" />
                   </a>
-                  <a href="#" className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center transition-colors">
+                  <a href="#" className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center transition-colors" aria-label="Instagram">
                     <Instagram className="w-5 h-5" />
                   </a>
-                  <a href="#" className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center transition-colors">
+                  <a href={SOCIAL_LINKS.youtube} target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center transition-colors" aria-label="YouTube">
                     <Youtube className="w-5 h-5" />
                   </a>
                 </div>

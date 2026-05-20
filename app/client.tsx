@@ -6,7 +6,8 @@ import NewsSection from '@/components/news/NewsSection';
 import NewsletterCard from '@/components/news/NewsletterCard';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
-import { getFeaturedArticles, getLatestArticles, getPoliticsArticles, getWorldArticles, getTravelArticles } from '@/lib/api';
+import { getFeaturedArticles, getLatestArticles, getPoliticsArticles, getWorldArticles, getTravelArticles, getAds, AD_POSITIONS, type AdItem } from '@/lib/api';
+import AdSlot from '@/components/ads/AdSlot';
 
 const Index = () => {
   const [featuredArticle, setFeaturedArticle] = useState<any>(null);
@@ -22,6 +23,7 @@ const Index = () => {
   const [loadingEditorsPost, setLoadingEditorsPost] = useState(true);
   const [travelNews, setTravelNews] = useState<any[]>([]);
   const [loadingTravelNews, setLoadingTravelNews] = useState(true);
+  const [ads, setAds] = useState<AdItem[]>([]);
 
   useEffect(() => {
     const fetchFeaturedHero = async () => {
@@ -110,18 +112,35 @@ const Index = () => {
       }
     };
 
+    const fetchAds = async () => {
+      try {
+        const data = await getAds();
+        setAds(data);
+      } catch (error) {
+        console.error('Error fetching ads:', error);
+        setAds([]);
+      }
+    };
+
     fetchFeaturedHero();
     fetchTodaysHotSpot();
     fetchEditorsPost();
     fetchPoliticsArticles();
     fetchWorldNews();
     fetchTravelNews();
+    fetchAds();
   }, []);
 
   return (
     <Layout>
       {/* Hero Section */}
       <section className="news-container py-6 md:py-10 lg:py-12">
+        {/* Top leaderboard — homepage_main */}
+        <AdSlot
+          position={AD_POSITIONS.HOMEPAGE_MAIN}
+          ads={ads}
+          className="mb-6 md:mb-8"
+        />
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
           {/* Main Featured Area */}
           <div className="lg:col-span-8">
@@ -136,7 +155,9 @@ const Index = () => {
               </div>
             ) : featuredArticle ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                
                 {/* Main Featured Article */}
+
                 <div className="md:col-span-2">
                   <ArticleCard article={featuredArticle} variant="featured" />
                 </div>
@@ -150,11 +171,18 @@ const Index = () => {
             )}
           </div>
 
-          {/* Top Stories Sidebar */}
-          <div className="lg:col-span-4">
+          {/* Top Stories Sidebar + homepage_sidebar */}
+          <div className="lg:col-span-4 flex flex-col gap-6">
+            <AdSlot position={AD_POSITIONS.HOMEPAGE_SIDEBAR} ads={ads} />
             <TopStoriesSidebar />
           </div>
         </div>
+        {/* Wide banner below hero — homepage_main_bottom */}
+        <AdSlot
+          position={AD_POSITIONS.HOMEPAGE_MAIN_BOTTOM}
+          ads={ads}
+          className="mt-6 md:mt-10"
+        />
       </section>
 
       {/* Politics Section */}
@@ -194,8 +222,9 @@ const Index = () => {
               )}
             </div>
 
-          {/* Sidebar */}
-          <div className="lg:col-span-4 space-y-6">
+          {/* Politics sidebar — homepage_sidebar_2 */}
+          <div className="lg:col-span-4 flex flex-col gap-6">
+            <AdSlot position={AD_POSITIONS.HOMEPAGE_SIDEBAR_2} ads={ads} />
             <TopStoriesSidebar title="Top Stories" limit={4} />
           </div>
           </div>

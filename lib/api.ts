@@ -2,7 +2,13 @@ import axios from 'axios'
 import { Article } from '@/data/newsData'
 import { htmlToPlainText } from '@/lib/utils'
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://192.168.29.186:8000'
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://10.95.4.86:8000'
+
+/** Build shareable short link on the Next.js site (not the Laravel API host). */
+export function buildShortLinkUrl(marketingSlug: string): string {
+    const base = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/$/, '')
+    return `${base}/q/${encodeURIComponent(marketingSlug)}`
+}
 const API_MEDIA_ORIGIN = API_BASE_URL
 
 const api = axios.create({
@@ -325,6 +331,95 @@ export const getArticleBySlug = async (slug: string) => {
         }
         return null;
     }
+}
+
+/** Map Laravel `redirect_to` (e.g. `/news/my-slug`) to Next.js article route. */
+export function mapShortUrlRedirect(redirectTo: string): string {
+    const trimmed = redirectTo.trim()
+    const newsMatch = trimmed.match(/^\/news\/(.+)$/i)
+    if (newsMatch) {
+        return `/article/${decodeURIComponent(newsMatch[1])}`
+    }
+    if (trimmed.startsWith('/')) {
+        return trimmed
+    }
+    return `/article/${trimmed}`
+}
+
+/** Homepage fallback when short URL is invalid or API fails. */
+export const SHORT_URL_FALLBACK_PATH = '/'
+
+/** Resolve marketing short URL → article path (`GET {API_BASE_URL}/q/{slug}`). */
+export const resolveShortUrl = async (slug: string): Promise<string | null> => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/q/${encodeURIComponent(slug)}`, {
+            headers: { Accept: 'application/json' },
+        })
+        const redirectTo = response.data?.redirect_to
+        if (typeof redirectTo === 'string' && redirectTo.trim()) {
+            return mapShortUrlRedirect(redirectTo)
+        }
+        return null
+    } catch (error: any) {
+        if (error.response?.status === 404) {
+            return null
+        }
+        console.error('Error resolving short URL:', slug, error)
+        return null
+    }
+}
+
+export type AdItem = {
+    id: number
+    title: string
+    link: string
+    position: string
+    description: string
+    click_url?: string
+    clicks?: number
+    status?: string
+}
+
+export const AD_POSITIONS = {
+    HOMEPAGE_MAIN: 'homepage_main',
+    HOMEPAGE_MAIN_BOTTOM: 'homepage_main_bottom',
+    HOMEPAGE_SIDEBAR: 'homepage_sidebar',
+    HOMEPAGE_SIDEBAR_2: 'homepage_sidebar_2',
+} as const
+
+/** Extract first image URL from ad HTML description. */
+export function extractAdImageUrl(description: string): string {
+    if (!description) return ''
+    const match = description.match(/<img[^>]+src=["']([^"']+)["']/i)
+    return match?.[1] ? normalizeMediaUrl(match[1]) : ''
+}
+
+/** Prefer tracked click_url; normalize API host for current env. */
+export function getAdClickHref(ad: AdItem): string {
+    const raw = (ad.click_url || ad.link || '').trim()
+    if (!raw) return '#'
+    return raw
+        .replace(/^https?:\/\/localhost:8000/i, API_BASE_URL)
+        .replace(/^https?:\/\/127\.0\.0\.1:8000/i, API_BASE_URL)
+}
+
+export const getAds = async (): Promise<AdItem[]> => {
+    try {
+        const response = await api.get('/NewsFront/ads')
+        if (response.data.status && Array.isArray(response.data.data)) {
+            return response.data.data.filter(
+                (ad: AdItem) => ad.status === 'active' || ad.status === undefined
+            )
+        }
+        return []
+    } catch (error) {
+        console.error('Error fetching ads:', error)
+        return []
+    }
+}
+
+export function getAdsByPosition(ads: AdItem[], position: string): AdItem | undefined {
+    return ads.find((ad) => ad.position === position)
 }
 
 // Submit contact form

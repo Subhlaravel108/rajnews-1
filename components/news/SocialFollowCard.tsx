@@ -1,5 +1,6 @@
 import { Facebook, Youtube, Twitter, Instagram, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { SOCIAL_LINKS } from '@/lib/constants';
 
 const SocialFollowCard = () => {
   return (
@@ -17,7 +18,7 @@ const SocialFollowCard = () => {
       {/* Super simple one-line icons */}
       <div className="flex gap-2">
         <a
-          href="https://facebook.com/rajasthannews"
+          href={SOCIAL_LINKS.facebook}
           target="_blank"
           rel="noopener noreferrer"
           className="flex-1"
@@ -30,7 +31,7 @@ const SocialFollowCard = () => {
         </a>
 
         <a
-          href="https://youtube.com/c/rajasthannews"
+          href={SOCIAL_LINKS.youtube}
           target="_blank"
           rel="noopener noreferrer"
           className="flex-1"

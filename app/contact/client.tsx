@@ -4,7 +4,7 @@ import Layout from '@/components/layout/Layout';
 import { Phone, Mail, Send, Facebook, Twitter, Instagram, Youtube, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { CONTACT_INFO } from '@/lib/constants';
+import { CONTACT_INFO, SOCIAL_LINKS } from '@/lib/constants';
 import { submitContactForm } from '@/lib/api';
 
 interface FormErrors {
@@ -412,7 +412,9 @@ const ContactPage = () => {
               <h3 className="text-xl font-bold text-gray-900 mb-4">Follow Us</h3>
               <div className="flex flex-wrap gap-3">
                 <a
-                  href="#"
+                  href={SOCIAL_LINKS.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-center justify-center w-12 h-12 bg-[#172C64] text-white rounded-xl hover:bg-[#F05C03] transition-colors"
                   aria-label="Facebook"
                 >
@@ -433,7 +435,9 @@ const ContactPage = () => {
                   <Instagram className="w-5 h-5" />
                 </a>
                 <a
-                  href="#"
+                  href={SOCIAL_LINKS.youtube}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-center justify-center w-12 h-12 bg-[#172C64] text-white rounded-xl hover:bg-[#F05C03] transition-colors"
                   aria-label="YouTube"
                 >

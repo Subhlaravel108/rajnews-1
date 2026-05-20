@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Menu, X, Facebook, Twitter, Instagram, Youtube, Search, User, ChevronDown, Bell, Newspaper, Globe, Phone } from 'lucide-react';
 import { getCategories } from '@/lib/api';
+import { SOCIAL_LINKS } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -109,7 +110,7 @@ const Header = () => {
             
             <div className="hidden md:flex items-center gap-4">
               <div className="flex items-center gap-3">
-                <a href="#" className="hover:text-[#F0C24C] transition-colors" aria-label="Facebook">
+                <a href={SOCIAL_LINKS.facebook} target="_blank" rel="noopener noreferrer" className="hover:text-[#F0C24C] transition-colors" aria-label="Facebook">
                   <Facebook className="w-4 h-4" />
                 </a>
                 <a href="#" className="hover:text-[#F0C24C] transition-colors" aria-label="Twitter">
@@ -118,7 +119,7 @@ const Header = () => {
                 <a href="#" className="hover:text-[#F0C24C] transition-colors" aria-label="Instagram">
                   <Instagram className="w-4 h-4" />
                 </a>
-                <a href="#" className="hover:text-[#F0C24C] transition-colors" aria-label="YouTube">
+                <a href={SOCIAL_LINKS.youtube} target="_blank" rel="noopener noreferrer" className="hover:text-[#F0C24C] transition-colors" aria-label="YouTube">
                   <Youtube className="w-4 h-4" />
                 </a>
               </div>
@@ -413,10 +414,14 @@ const Header = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-[#172C64]">Follow us:</span>
                   <div className="flex items-center gap-3">
-                    <Facebook className="w-5 h-5 text-[#172C64] hover:text-[#F05C03] cursor-pointer" />
+                    <a href={SOCIAL_LINKS.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                      <Facebook className="w-5 h-5 text-[#172C64] hover:text-[#F05C03] cursor-pointer" />
+                    </a>
                     <Twitter className="w-5 h-5 text-[#172C64] hover:text-[#F05C03] cursor-pointer" />
                     <Instagram className="w-5 h-5 text-[#172C64] hover:text-[#F05C03] cursor-pointer" />
-                    <Youtube className="w-5 h-5 text-[#172C64] hover:text-[#F05C03] cursor-pointer" />
+                    <a href={SOCIAL_LINKS.youtube} target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                      <Youtube className="w-5 h-5 text-[#172C64] hover:text-[#F05C03] cursor-pointer" />
+                    </a>
                   </div>
                 </div>
               </div>
